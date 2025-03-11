@@ -14,6 +14,10 @@ body {
     padding: 0;
     margin-top: 24px;
   }
+  .gallery-item {
+    display: inline-block;
+}
+
   .gallery-link {
     display: block;
   }
