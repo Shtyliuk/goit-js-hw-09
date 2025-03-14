@@ -1,54 +1,49 @@
-const STORAGE_KEY = '"feedback-form-state"'
+const STORAGE_KEY = 'feedback-form-state';
 const form = document.querySelector('.feedback-form');
 
-form.addEventListener('input', () => {
-    const userMail = form.elements.email.value;
-    const userText = form.elements.message.value;
-
-    const data = {
-        mail: userMail,
-        text: userText,
-    }
-    
-    saveInLS(STORAGE_KEY, data);
-});
+const formData = {
+  email: '',
+  message: ''
+};
 
 function loadFromLS(key) {
-    const data = localStorage.getItem(key);
-    try {
-        const result = JSON.parse(data);
-        return result;
-    } catch {
-        return data;
-    }
+  const data = localStorage.getItem(key);
+  try {
+    return JSON.parse(data) || {};
+  } catch {
+    return {};
+  }
 }
 
-function saveInLS(key, value) {
-    const jsonSave = JSON.stringify(value);
-    localStorage.setItem(key, jsonSave);
+function saveToLS(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
 function loadData() {
-    const {mail, text} = loadFromLS(STORAGE_KEY) || {};
-    form.elements.email.value = mail || '';
-    form.elements.message.value = text || '';
+  const savedData = loadFromLS(STORAGE_KEY);
+  formData.email = savedData.email || '';
+  formData.message = savedData.message || '';
+
+  form.elements.email.value = formData.email;
+  form.elements.message.value = formData.message;
 }
 
+form.addEventListener('input', (event) => {
+  formData[event.target.name] = event.target.value;
+  saveToLS(STORAGE_KEY, formData);
+});
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  if (!form.elements.email.value || !form.elements.message.value) {
+    alert('Please fill in all form fields before submitting');
+    return;
+  }
+
+  console.log(formData);
+  localStorage.removeItem(STORAGE_KEY);
+  form.reset();
+});
+
 loadData();
-
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    if (form.elements.email.value && form.elements.message.value !== "") {
-        const data = loadFromLS(STORAGE_KEY) || {};
-        localStorage.removeItem(STORAGE_KEY);
-        form.reset();
-        const sendData = {
-            email: data.mail,
-            message: data.text,
-        }
-        console.log(sendData);
-    } else {
-        alert(`Please fill in all form fields before submitting.`);
-    }
-})
